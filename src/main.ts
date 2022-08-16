@@ -30,7 +30,8 @@ async function bootstrap() {
 
   app.use(cookieParser());
   app.enableCors();
-  await app.listen(port || 3000);
-  logger.log(`Application running on port ${port}`);
+  app.listen(port || 3000, () => {
+    logger.log(`Application running on port ${port}`);
+  });
 }
 bootstrap();
