@@ -19,6 +19,7 @@ import * as bcrypt from 'bcryptjs';
 import { User } from 'src/entities/user.entity';
 import { CookieOptions } from 'express';
 import { extname } from 'path';
+import { MulterFile } from 'src/entities/common.types';
 
 @Injectable()
 export class AuthService {
@@ -141,7 +142,7 @@ export class AuthService {
     return this.userRepository.searchUser(keyward, pagingDto);
   }
 
-  async updateProfileImage(user: User, image: Express.Multer.File) {
+  async updateProfileImage(user: User, image: MulterFile) {
     const filename = `${user.id}_${Date.now()}`;
     const imageUrl =
       this.config.get<string>('SERVER_URL') +

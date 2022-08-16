@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import { existsSync, mkdirSync, unlinkSync, writeFileSync } from 'fs';
+import { MulterFile } from './entities/common.types';
 
 function getPath(filePath?: string) {
   const defaultPath = 'uploads';
@@ -7,7 +8,7 @@ function getPath(filePath?: string) {
 }
 
 export function uploadFileDisk(
-  file: Express.Multer.File,
+  file: MulterFile,
   fileName: string,
   filePath?: string,
 ) {

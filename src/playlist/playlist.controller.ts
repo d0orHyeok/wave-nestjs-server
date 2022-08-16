@@ -20,6 +20,7 @@ import { User } from 'src/entities/user.entity';
 import { CreatePlaylistDto } from './dto/createPlaylistDto';
 import { PlaylistService } from './playlist.service';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { MulterFile } from 'src/entities/common.types';
 
 @Controller('playlist')
 export class PlaylistController {
@@ -124,7 +125,7 @@ export class PlaylistController {
   @UseInterceptors(FileInterceptor('file'))
   changeCover(
     @Param('id', ParseIntPipe) id: number,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: MulterFile,
   ) {
     return this.playlistService.changePlaylistImage(id, file);
   }

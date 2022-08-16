@@ -31,6 +31,7 @@ import { uploadFileDisk } from 'src/fileFunction';
 import { ConfigService } from '@nestjs/config';
 import { CheckDatePipe } from './pipes/check-date.pipe';
 import { musicGenres } from 'src/entities/music.entity';
+import { MulterFile } from 'src/entities/common.types';
 
 @Controller('music')
 export class MusicController {
@@ -226,7 +227,7 @@ export class MusicController {
   @UseInterceptors(FileInterceptor('file'))
   changeCover(
     @Param('id', ParseIntPipe) id: number,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: MulterFile,
   ) {
     return this.musicService.changeMusicCover(id, file);
   }

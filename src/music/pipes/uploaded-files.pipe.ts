@@ -1,10 +1,11 @@
 import { BadRequestException, PipeTransform } from '@nestjs/common';
+import { MulterFile } from 'src/entities/common.types';
 
 export class UploadedFilesPipe implements PipeTransform {
   transform(uploadedFiles: {
-    musics?: Express.Multer.File[];
-    covers?: Express.Multer.File[];
-    datas?: Express.Multer.File[];
+    musics?: MulterFile[];
+    covers?: MulterFile[];
+    datas?: MulterFile[];
   }) {
     const { musics, covers, datas } = uploadedFiles;
     if (!musics || !datas) {

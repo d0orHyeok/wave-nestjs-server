@@ -10,6 +10,7 @@ import { PagingDto } from 'src/common/dto/paging.dto';
 import { deleteFileDisk, uploadFileDisk } from 'src/fileFunction';
 import { extname } from 'path';
 import { ConfigService } from '@nestjs/config';
+import { MulterFile } from 'src/entities/common.types';
 
 @Injectable()
 export class PlaylistService {
@@ -114,7 +115,7 @@ export class PlaylistService {
     return this.playlistRepository.addMusicToPlaylist(playlistId, musics);
   }
 
-  async changePlaylistImage(playlistId: number, file: Express.Multer.File) {
+  async changePlaylistImage(playlistId: number, file: MulterFile) {
     const playlist = await this.playlistRepository.findPlaylistById(playlistId);
     const { image } = playlist;
     const serverUrl = this.configService.get<string>('SERVER_URL');

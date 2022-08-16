@@ -14,6 +14,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   const port = configService.get<string>('SERVER_PORT');
+
   const adminConfig: ServiceAccount = {
     projectId: configService.get<string>('FIREBASE_PROJECT_ID'),
     privateKey: configService
@@ -29,8 +30,7 @@ async function bootstrap() {
 
   app.use(cookieParser());
   app.enableCors();
-
-  await app.listen(port);
+  await app.listen(port || 3000);
   logger.log(`Application running on port ${port}`);
 }
 bootstrap();

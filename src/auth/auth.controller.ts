@@ -26,6 +26,7 @@ import { User } from 'src/entities/user.entity';
 import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CheckTargetPipe } from './pipes/check-target.pipe';
+import { MulterFile } from 'src/entities/common.types';
 
 @Controller('auth')
 export class AuthController {
@@ -117,7 +118,7 @@ export class AuthController {
   @UseInterceptors(FileInterceptor('file'))
   async updateProfileImage(
     @GetUser() user: User,
-    @UploadedFile() image: Express.Multer.File,
+    @UploadedFile() image: MulterFile,
   ) {
     return this.authService.updateProfileImage(user, image);
   }

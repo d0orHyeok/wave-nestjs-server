@@ -1,13 +1,14 @@
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsOptional, ValidateNested } from 'class-validator';
+import { MulterFile } from 'src/entities/common.types';
 import { UploadMusicDataDto } from './upload-music-data.dto';
 
 export class UploadMusicDto {
   @IsNotEmpty()
-  music: Express.Multer.File;
+  music: MulterFile;
 
   @IsOptional()
-  cover?: Express.Multer.File;
+  cover?: MulterFile;
 
   @IsNotEmpty()
   @Type(() => UploadMusicDataDto)

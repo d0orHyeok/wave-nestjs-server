@@ -17,6 +17,7 @@ import * as uuid from 'uuid';
 import { extname, resolve } from 'path';
 import * as shell from 'shelljs';
 import { readFileSync } from 'fs';
+import { MulterFile } from 'src/entities/common.types';
 
 @Injectable()
 export class MusicService {
@@ -88,9 +89,9 @@ export class MusicService {
   }
 
   changeMusicFileData(
-    file: Express.Multer.File,
+    file: MulterFile,
     data: UploadMusicDataDto,
-    image?: Express.Multer.File,
+    image?: MulterFile,
   ) {
     const { description, lyrics } = data;
 
@@ -145,7 +146,7 @@ export class MusicService {
     return this.musicRepository.updateMusicData(id, updateMusicDataDto);
   }
 
-  async changeMusicCover(id: number, file: Express.Multer.File) {
+  async changeMusicCover(id: number, file: MulterFile) {
     const music = await this.musicRepository.findMusicById(id);
     const { cover, link, filename } = music;
     const serverUrl = this.configService.get<string>('SERVER_URL');
@@ -209,7 +210,7 @@ export class MusicService {
     }
   }
 
-  async generateWaveformData(file: Express.Multer.File) {
+  async generateWaveformData(file: MulterFile) {
     // 음악의 파형을 분석하고 데이터를 반환
 
     // Save music file temporarily
