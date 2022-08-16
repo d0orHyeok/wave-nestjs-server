@@ -29,7 +29,7 @@ async function bootstrap() {
   });
 
   app.use(cookieParser());
-  app.enableCors();
+  app.enableCors({ origin: true, credentials: true });
   app.listen(process.env.PORT || port || 3000, () => {
     logger.log(`Application running on port ${port}`);
   });
