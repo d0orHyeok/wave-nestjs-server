@@ -2,10 +2,9 @@ import { AuthRegisterDto } from './dto/auth-register.dto';
 import { User } from 'src/entities/user.entity';
 import { EntityRepository, Repository, SelectQueryBuilder } from 'typeorm';
 import {
+  BadRequestException,
   ConflictException,
   InternalServerErrorException,
-  NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { Music } from 'src/entities/music.entity';
 import { Playlist } from 'src/entities/playlist.entity';
@@ -91,7 +90,7 @@ export class UserRepository extends Repository<User> {
       .getOne();
 
     if (!user) {
-      throw new UnauthorizedException(`Can't find User with id: ${username}`);
+      throw new BadRequestException({}, `Can't find User with id: ${username}`);
     }
 
     return user;
@@ -106,7 +105,7 @@ export class UserRepository extends Repository<User> {
       if (nullable) {
         return null;
       } else {
-        throw new NotFoundException(`Can't find User with id: ${id}`);
+        throw new BadRequestException(`Can't find User with id: ${id}`);
       }
     }
 

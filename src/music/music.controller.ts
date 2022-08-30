@@ -96,6 +96,12 @@ export class MusicController {
     return this.musicService.findRelatedMusic(id, pagingDto);
   }
 
+  @Get('/related')
+  @UseGuards(JwtAuthGuard)
+  findUsersRelatedMusics(@GetUser() user: User) {
+    return this.musicService.findUsersRelated(user);
+  }
+
   @Get('/popular/:userId')
   getPopularMusics(
     @Param('userId') userId: string,

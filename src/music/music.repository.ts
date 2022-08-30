@@ -10,6 +10,7 @@ import { Music } from 'src/entities/music.entity';
 import {
   Brackets,
   EntityRepository,
+  NotBrackets,
   Repository,
   SelectQueryBuilder,
 } from 'typeorm';
@@ -208,7 +209,7 @@ export class MusicRepository extends Repository<Music> {
   async findRelatedMusic(id: number, musicPagingDto: PagingDto) {
     const music = await this.findMusicById(id);
 
-    const { title, album, artist } = music;
+    const { title, artist } = music;
     const nickname = music.user.nickname;
     const { skip, take } = musicPagingDto;
 
@@ -220,11 +221,6 @@ export class MusicRepository extends Repository<Music> {
             let query = qb.where('LOWER(music.title) LIKE LOWER(:title)', {
               title: `%${title}%`,
             });
-            if (album && album.length) {
-              query = query.orWhere('LOWER(music.album) LIKE LOWER(:album)', {
-                album: `%${album}%`,
-              });
-            }
             if (artist && artist.length) {
               query = query.orWhere(`LOWER(music.artist) LIKE LOWER(:artist)`, {
                 artist: `%${artist}%`,
@@ -244,6 +240,46 @@ export class MusicRepository extends Repository<Music> {
         .andWhere('music.status = :status', { status: 'PUBLIC' })
         .skip(skip)
         .take(take)
+        .getMany();
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error,
+        `Error to get related musics`,
+      );
+    }
+  }
+
+  async findRelatedMusicsByIds(ids: number[]) {
+    const musics = await this.findMusicByIds(ids);
+
+    const titleWhere: string[] = [];
+    const nicknameWhere: string[] = [];
+    const titles = musics.map((music, index) => {
+      titleWhere.push(`LOWER(music.title) LIKE LOWER(:${index})`);
+      return `%${music.title}%`;
+    });
+    const nicknames = musics.map((music, index) => {
+      nicknameWhere.push(`LOWER(user.nickname) LIKE LOWER(:nickname${index})`);
+      return `%${music.user.nickname || music.user.username}%`;
+    });
+
+    try {
+      return this.musicSimpleQuery()
+        .where(new NotBrackets((qb) => qb.whereInIds(ids)))
+        .andWhere(
+          new Brackets((qb) => {
+            const titleQuery = titleWhere.reduce((a, b) => `${a} OR ${b}`);
+            const nicknameQuery = nicknameWhere.reduce(
+              (a, b) => `${a} OR ${b}`,
+            );
+            return qb
+              .where(titleQuery, { ...titles })
+              .orWhere(nicknameQuery, { ...nicknames });
+          }),
+        )
+        .andWhere('music.status = :status', { status: 'PUBLIC' })
+        .skip(0)
+        .take(30)
         .getMany();
     } catch (error) {
       throw new InternalServerErrorException(

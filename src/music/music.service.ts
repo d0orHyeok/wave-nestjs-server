@@ -72,6 +72,15 @@ export class MusicService {
     return this.musicRepository.findRelatedMusic(id, pagingDto);
   }
 
+  async findUsersRelated(user: User) {
+    // 유저의 최근 재생기록과 좋아요표시한 음악의 관련음악을 가져온다
+    const { historys, likeMusics } = user;
+    const ids: number[] = [];
+    historys.slice(0, 3).forEach((history) => ids.push(history.musicId));
+    likeMusics.slice(0, 3).forEach((music) => ids.push(music.id));
+    return this.musicRepository.findRelatedMusicsByIds(ids);
+  }
+
   async searchMusic(keyward: string, pagingDto: PagingDto, uid?: string) {
     return this.musicRepository.searchMusic(keyward, pagingDto, uid);
   }

@@ -11,6 +11,7 @@ import {
   Injectable,
   UnauthorizedException,
   InternalServerErrorException,
+  HttpException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserRepository } from './user.repository';
@@ -52,7 +53,7 @@ export class AuthService {
   ): Promise<void> {
     const isMatch = await bcrypt.compare(plainPassword, hashedPassword);
     if (!isMatch) {
-      throw new UnauthorizedException('Wrong Password');
+      throw new HttpException('Wrong Password', 401);
     }
   }
 
@@ -125,13 +126,6 @@ export class AuthService {
 
   async getRandomUsers() {
     return this.userRepository.getRandomUsers();
-  }
-
-  async getRecentHistory(userId: string) {
-    return this.historyRepository.findHistorysByUserId(userId, {
-      skip: 0,
-      take: 10,
-    });
   }
 
   async findUserById(id: string, nullable?: boolean) {

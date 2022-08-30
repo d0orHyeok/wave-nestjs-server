@@ -72,7 +72,7 @@ export class User extends BaseEntity {
 
   // History
   @OneToMany(() => History, (history) => history.user)
-  history: History[];
+  historys: History[];
 
   // Date
   @CreateDateColumn()

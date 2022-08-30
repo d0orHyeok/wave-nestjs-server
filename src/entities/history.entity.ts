@@ -22,7 +22,7 @@ export class History extends BaseEntity {
   // History whe played the music
   @Column({ nullable: true, name: 'userId' })
   userId: string;
-  @ManyToOne(() => User, (user) => user.history, {
+  @ManyToOne(() => User, (user) => user.historys, {
     cascade: true,
     onDelete: 'CASCADE',
     nullable: true,
