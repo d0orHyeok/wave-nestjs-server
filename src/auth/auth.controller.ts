@@ -54,7 +54,7 @@ export class AuthController {
       this.authService.getRefreshTokenWithCookie(payload);
     await this.authService.setCurrentRefreshToken(refreshToken, user);
 
-    response.cookie('RefreshToken', refreshToken, cookieOption);
+    response.cookie('refresh', refreshToken, cookieOption);
 
     return { accessToken };
   }
@@ -68,7 +68,7 @@ export class AuthController {
     const cookieOption = await this.authService.removeRefreshTokenWithCookie(
       user,
     );
-    response.cookie('RefreshToken', '', cookieOption);
+    response.cookie('refresh', '', cookieOption);
     return;
   }
 

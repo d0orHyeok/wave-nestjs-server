@@ -83,6 +83,8 @@ export class AuthService {
       refreshToken,
       cookieOption: {
         httpOnly: true,
+        sameSite: 'none',
+        secure: true,
       },
     };
   }
@@ -121,6 +123,8 @@ export class AuthService {
     return {
       httpOnly: true,
       maxAge: 0,
+      sameSite: 'none',
+      secure: true,
     };
   }
 
