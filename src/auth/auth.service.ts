@@ -142,14 +142,12 @@ export class AuthService {
 
   async updateProfileImage(user: User, image: MulterFile) {
     const filename = `${user.id}_${Date.now()}`;
-    const imageUrl =
-      this.config.get<string>('SERVER_URL') +
-      '/' +
-      uploadFileDisk(
-        image,
-        `${filename}${extname(image.originalname)}`,
-        'profile',
-      );
+    const serverUrl = this.config.get<string>('SERVER_URL');
+    const imageUrl = `${serverUrl}/${uploadFileDisk(
+      image,
+      `${filename}${extname(image.originalname)}`,
+      'profile',
+    )}`;
 
     const existProfileImage = user.profileImage;
     user.profileImage = imageUrl;

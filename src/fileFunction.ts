@@ -1,10 +1,11 @@
 import fetch from 'node-fetch';
 import { existsSync, mkdirSync, unlinkSync, writeFileSync } from 'fs';
 import { MulterFile } from './entities/common.types';
+import { join, resolve } from 'path';
 
 function getPath(filePath?: string) {
-  const defaultPath = 'uploads';
-  return !filePath ? defaultPath : `${defaultPath}/${filePath}`;
+  const defaultPath = resolve(__dirname, '../', 'uploads');
+  return !filePath ? defaultPath : resolve(defaultPath, filePath);
 }
 
 export function uploadFileDisk(
@@ -15,18 +16,22 @@ export function uploadFileDisk(
   const uploadPath = getPath(filePath);
 
   if (!existsSync(uploadPath)) {
-    mkdirSync(uploadPath);
+    mkdirSync(uploadPath, { recursive: true });
   }
 
-  const uploadFile = `${__dirname}/../${uploadPath}/${fileName}`;
-  writeFileSync(uploadFile, file.buffer); // file.path 임시 파일 저장소
+  const writePath = join(uploadPath, fileName);
+  writeFileSync(writePath, file.buffer); // file.path 임시 파일 저장소
 
-  return `${uploadPath}/${fileName}`;
+  return `uploads${writePath.split('uploads')[1]}`.replace(/\\/gi, '/');
 }
 
 export function deleteFileDisk(fileName: string) {
-  if (existsSync(fileName)) {
-    unlinkSync(fileName);
+  const serverUrl = process.env.SERVER_URL;
+  const root = resolve(__dirname, '../');
+  const filePath = join(root, fileName.replace(serverUrl, ''));
+
+  if (existsSync(filePath)) {
+    unlinkSync(filePath);
   }
 }
 
