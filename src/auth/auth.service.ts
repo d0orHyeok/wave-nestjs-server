@@ -72,11 +72,13 @@ export class AuthService {
     refreshToken: string;
     cookieOption: CookieOptions;
   } {
+    const expiresIn = Number(
+      this.config.get<number>('JWT_REFRESH_TOKEN_EXPIRATION_TIME'),
+    );
+
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.config.get<string>('JWT_REFRESH_TOKEN_SECREAT'),
-      expiresIn: Number(
-        this.config.get<number>('JWT_REFRESH_TOKEN_EXPIRATION_TIME'),
-      ),
+      expiresIn,
     });
 
     return {
@@ -85,6 +87,7 @@ export class AuthService {
         httpOnly: true,
         sameSite: 'none',
         secure: true,
+        maxAge: expiresIn,
       },
     };
   }
@@ -117,8 +120,8 @@ export class AuthService {
     }
   }
 
-  async removeRefreshTokenWithCookie(user: User): Promise<CookieOptions> {
-    await this.userRepository.updateRefreshToken(user, null);
+  removeRefreshTokenWithCookie(user: User): CookieOptions {
+    this.userRepository.updateRefreshToken(user, null);
 
     return {
       httpOnly: true,

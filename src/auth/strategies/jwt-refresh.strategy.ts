@@ -20,7 +20,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request) => {
-          return request?.cookies?.refresh;
+          return request?.cookies?.waverefresh;
         },
       ]),
       ignoreExpiration: false,
@@ -32,17 +32,18 @@ export class JwtRefreshStrategy extends PassportStrategy(
   }
 
   async validate(req: Request, payload) {
-    const refreshToken = req.cookies?.refresh;
+    const refreshToken = req.cookies?.waverefresh;
+    if (!refreshToken) {
+      throw new UnauthorizedException("There's no refresh token");
+    }
+
     const { username } = payload;
-
     const user: User = await this.userRepository.findUserByUsername(username);
-
     if (!user) {
       throw new UnauthorizedException("Can't find user");
     }
 
     const { hashedRefreshToken } = user;
-
     await this.authService.compareRefreshToken(
       refreshToken,
       hashedRefreshToken,
