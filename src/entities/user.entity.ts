@@ -39,6 +39,8 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   profileImage: string;
   @Column({ nullable: true })
+  profileImageFilename: string;
+  @Column({ nullable: true })
   description: string;
 
   // User Likes & Reposts

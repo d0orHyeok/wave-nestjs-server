@@ -16,5 +16,9 @@ export class MusicDataDto extends UploadMusicDataDto {
 
   @IsOptional()
   @IsString()
+  coverFilename?: string;
+
+  @IsOptional()
+  @IsString()
   waveform?: string;
 }

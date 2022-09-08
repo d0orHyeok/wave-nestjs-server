@@ -65,6 +65,8 @@ export class Music extends BaseEntity {
   @Column({ nullable: true })
   cover: string;
   @Column({ nullable: true })
+  coverFilename: string;
+  @Column({ nullable: true })
   description: string;
   @Column('text', { nullable: true, array: true })
   genre: string[];

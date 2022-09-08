@@ -172,42 +172,7 @@ export class MusicController {
     @UploadedFiles(UploadedFilesPipe) uploadMusicDto: UploadMusicDto,
     @GetUser() user: User,
   ) {
-    const { music, cover, data } = uploadMusicDto;
-
-    const fileBase = `${Date.now()}_${user.id}_`;
-
-    const { buffer, originalname, mimetype } =
-      this.musicService.changeMusicFileData(music, data, cover);
-
-    let coverUrl: string | undefined;
-    if (cover) {
-      coverUrl =
-        this.config.get<string>('SERVER_URL') +
-        '/' +
-        uploadFileDisk(
-          cover,
-          `${fileBase}cover${extname(cover.originalname)}`,
-          'cover',
-        );
-    }
-
-    const { filename, link } = await this.musicService.uploadFileFirebase(
-      buffer,
-      mimetype,
-      fileBase + originalname,
-    );
-
-    const waveform = await this.musicService.generateWaveformData(music);
-
-    const createMusicData = {
-      ...data,
-      filename,
-      link,
-      cover: coverUrl,
-      waveform,
-    };
-
-    return this.musicService.createMusic(createMusicData, user);
+    return this.musicService.uploadMusic(uploadMusicDto, user);
   }
 
   @Delete('/:id')

@@ -29,6 +29,8 @@ export class Playlist {
   @Column({ nullable: true })
   image: string;
   @Column({ nullable: true })
+  imageFilename: string;
+  @Column({ nullable: true })
   description: string;
   @Column('text', { array: true, nullable: true })
   tags: string[];

@@ -2,7 +2,7 @@ import { HistoryRepository } from './../history/history.repository';
 import { PagingDto } from 'src/common/dto/paging.dto';
 import { PlaylistRepository } from './../playlist/playlist.repository';
 import { AuthProfileDto } from './dto/auth-profile.dto';
-import { deleteFileDisk, uploadFileDisk } from 'src/fileFunction';
+import { deleteFileFirebase, uploadFileFirebase } from 'src/fileFunction';
 import { MusicRepository } from 'src/music/music.repository';
 import { AuthRegisterDto } from './dto/auth-register.dto';
 import { ConfigService } from '@nestjs/config';
@@ -19,7 +19,6 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { User } from 'src/entities/user.entity';
 import { CookieOptions } from 'express';
-import { extname } from 'path';
 import { MulterFile } from 'src/entities/common.types';
 
 @Injectable()
@@ -144,31 +143,39 @@ export class AuthService {
   }
 
   async updateProfileImage(user: User, image: MulterFile) {
-    const filename = `${user.id}_${Date.now()}`;
-    const serverUrl = this.config.get<string>('SERVER_URL');
-    const imageUrl = `${serverUrl}/${uploadFileDisk(
-      image,
-      `${filename}${extname(image.originalname)}`,
-      'profile',
-    )}`;
+    const imagename = `${user.id}_${Date.now()}`;
 
-    const existProfileImage = user.profileImage;
-    user.profileImage = imageUrl;
+    const { filename, link } = await uploadFileFirebase(
+      image.buffer,
+      image.mimetype,
+      imagename,
+    );
+
+    const existProfileImage = user.profileImageFilename;
+    user.profileImage = link;
+    user.profileImageFilename = filename;
 
     try {
       await this.userRepository.save(user);
-      deleteFileDisk(existProfileImage);
-      return imageUrl;
+      if (existProfileImage) {
+        await deleteFileFirebase(existProfileImage);
+      }
+      return link;
     } catch (error) {
-      deleteFileDisk(imageUrl);
+      if (filename) {
+        await deleteFileFirebase(filename);
+      }
       throw new InternalServerErrorException(error);
     }
   }
 
   async deleteProfileImage(user: User) {
-    const imagelink = user.profileImage;
-    deleteFileDisk(imagelink);
+    const imagelink = user.profileImageFilename;
+    if (imagelink) {
+      await deleteFileFirebase(imagelink);
+    }
     user.profileImage = null;
+    user.profileImageFilename = null;
     await this.userRepository.save(user);
   }
 
