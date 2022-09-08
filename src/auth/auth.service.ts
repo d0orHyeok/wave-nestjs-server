@@ -37,13 +37,17 @@ export class AuthService {
     return this.userRepository.createUser(authRegisterDto);
   }
 
-  async validateUser(authCredentailDto: AuthCredentailDto): Promise<User> {
+  async validateUser(authCredentailDto: AuthCredentailDto) {
     const { username, password } = authCredentailDto;
 
     const user = await this.userRepository.findUserByUsername(username);
     await this.comparePassword(password, user.password);
+    const historys = await this.historyRepository.findHistorysByUserId(
+      user.id,
+      { skip: 0, take: 10 },
+    );
 
-    return user;
+    return { user, historys };
   }
 
   async comparePassword(

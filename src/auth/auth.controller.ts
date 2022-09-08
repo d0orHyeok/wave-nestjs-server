@@ -44,8 +44,10 @@ export class AuthController {
   async signIn(
     @Body(ValidationPipe) authCredentailDto: AuthCredentailDto,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<{ accessToken: string }> {
-    const user = await this.authService.validateUser(authCredentailDto);
+  ) {
+    const { user, historys } = await this.authService.validateUser(
+      authCredentailDto,
+    );
 
     const payload = { id: user.id, username: user.username };
 
@@ -56,7 +58,10 @@ export class AuthController {
 
     response.cookie('waverefresh', refreshToken, cookieOption);
 
-    return { accessToken };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { hashedRefreshToken, password, ...userData } = user;
+
+    return { accessToken, userData: { ...userData, historys } };
   }
 
   @Post('/signout')

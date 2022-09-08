@@ -24,10 +24,8 @@ import {
   FileFieldsInterceptor,
   FileInterceptor,
 } from '@nestjs/platform-express';
-import { extname } from 'path';
 import { UploadedFilesPipe } from './pipes/uploaded-files.pipe';
 import { UploadMusicDto } from './dto/upload-music.dto';
-import { uploadFileDisk } from 'src/fileFunction';
 import { ConfigService } from '@nestjs/config';
 import { CheckDatePipe } from './pipes/check-date.pipe';
 import { musicGenres } from 'src/entities/music.entity';
