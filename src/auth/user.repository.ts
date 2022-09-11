@@ -118,7 +118,7 @@ export class UserRepository extends Repository<User> {
         await this.createQueryBuilder('user').select('user.id').getMany()
       ).map((value) => value.id);
 
-      const maxLength = ids.length < 6 ? ids.length : 6;
+      const maxLength = ids.length < 4 ? ids.length : 4;
       const randomIds: string[] = [];
 
       while (randomIds.length < maxLength) {
