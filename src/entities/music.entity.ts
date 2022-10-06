@@ -111,13 +111,15 @@ export class Music extends BaseEntity {
   @OneToMany(() => History, (history) => history.music)
   history: History[];
 
-  @ManyToMany(() => User, (user) => user.repostMusics)
+  @ManyToMany(() => User, (user) => user.repostMusics, { onDelete: 'CASCADE' })
   reposts: User[];
-  @ManyToMany(() => User, (user) => user.likeMusics)
+  @ManyToMany(() => User, (user) => user.likeMusics, { onDelete: 'CASCADE' })
   likes: User[];
-  @ManyToMany(() => Playlist, (playlist) => playlist.musics)
+  @ManyToMany(() => Playlist, (playlist) => playlist.musics, {
+    onDelete: 'CASCADE',
+  })
   playlists: Playlist[];
-  @OneToMany(() => Comment, (comment) => comment.music)
+  @OneToMany(() => Comment, (comment) => comment.music, { onDelete: 'CASCADE' })
   comments: Comment[];
 
   // Date

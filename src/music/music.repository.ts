@@ -1,4 +1,3 @@
-import { UpdateMusicDataDto } from './dto/update-music-data.dto';
 import { PagingDto } from './../common/dto/paging.dto';
 import { MusicDataDto } from './dto/music-data.dto';
 import { User } from 'src/entities/user.entity';
@@ -90,7 +89,9 @@ export class MusicRepository extends Repository<Music> {
       .loadRelationCountAndMap('music.commentsCount', 'music.comments')
       .loadRelationCountAndMap('music.playlistsCount', 'music.playlists')
       .loadRelationCountAndMap('music.repostsCount', 'music.reposts')
-      .loadRelationCountAndMap('music.count', 'music.history');
+      .loadRelationCountAndMap('music.count', 'music.history')
+      .addSelect('music.genreLower')
+      .addSelect('music.tagsLower');
   }
 
   // Create
@@ -207,10 +208,17 @@ export class MusicRepository extends Repository<Music> {
   }
 
   async findRelatedMusic(id: number, musicPagingDto: PagingDto) {
-    const music = await this.findMusicById(id);
+    const music = await this.createQueryBuilder('music')
+      .leftJoinAndSelect('music.user', 'user')
+      .where('music.id = :id', { id })
+      .getOne();
+
+    if (!music) {
+      return [];
+    }
 
     const { title, artist } = music;
-    const nickname = music.user.nickname;
+    const nickname = music.user.nickname || music.user.username;
     const { skip, take } = musicPagingDto;
 
     try {
@@ -218,21 +226,18 @@ export class MusicRepository extends Repository<Music> {
         .where('music.id != :id', { id: music.id })
         .andWhere(
           new Brackets((qb) => {
-            let query = qb.where('LOWER(music.title) LIKE LOWER(:title)', {
-              title: `%${title}%`,
+            let query = qb.where('LOWER(music.title) LIKE :title', {
+              title: `%${title.toLowerCase()}%`,
             });
-            if (artist && artist.length) {
-              query = query.orWhere(`LOWER(music.artist) LIKE LOWER(:artist)`, {
-                artist: `%${artist}%`,
+            if (nickname) {
+              query = query.orWhere(`LOWER(user.nickname) LIKE :nickname`, {
+                nickname: `%${nickname.toLowerCase()}%`,
               });
             }
-            if (nickname) {
-              query = query.orWhere(
-                `LOWER(user.nickname) Like LOWER(:nickname)`,
-                {
-                  nickname: `%${nickname}%`,
-                },
-              );
+            if (artist && artist.length) {
+              query = query.orWhere(`LOWER(music.artist) LIKE :artist`, {
+                artist: `%${artist.toLowerCase()}%`,
+              });
             }
             return query;
           }),
@@ -250,7 +255,10 @@ export class MusicRepository extends Repository<Music> {
   }
 
   async findRelatedMusicsByIds(ids: number[]) {
-    const musics = await this.findMusicByIds(ids);
+    const musics = await this.createQueryBuilder('music')
+      .leftJoinAndSelect('music.user', 'user')
+      .whereInIds(ids)
+      .getMany();
 
     const titleWhere: string[] = [];
     const nicknameWhere: string[] = [];
@@ -259,7 +267,7 @@ export class MusicRepository extends Repository<Music> {
       return `%${music.title}%`;
     });
     const nicknames = musics.map((music, index) => {
-      nicknameWhere.push(`LOWER(user.nickname) LIKE LOWER(:nickname${index})`);
+      nicknameWhere.push(`LOWER(user.nickname) LIKE LOWER(:${index})`);
       return `%${music.user.nickname || music.user.username}%`;
     });
 
@@ -380,7 +388,7 @@ export class MusicRepository extends Repository<Music> {
         ? query.andWhere('music.genre IN (:genre)', { genre: [genre] })
         : query;
       return this.orderSelectQuery(query, date || 'week')
-        .take(100)
+        .take(50)
         .getMany();
     } catch (error) {
       throw new InternalServerErrorException(error, 'Error to get musics');
@@ -399,7 +407,7 @@ export class MusicRepository extends Repository<Music> {
       query = genre
         ? query.andWhere('music.genre IN (:genre)', { genre: [genre] })
         : query;
-      return this.orderSelectQuery(query).take(100).getMany();
+      return this.orderSelectQuery(query).take(50).getMany();
     } catch (error) {
       throw new InternalServerErrorException(error, 'Error to get musics');
     }
@@ -416,22 +424,6 @@ export class MusicRepository extends Repository<Music> {
         `Error to update music, music ID: ${music.id}`,
       );
     }
-  }
-
-  async updateMusicData(id: number, updateMusicDataDto: UpdateMusicDataDto) {
-    const music = await this.findMusicById(id);
-    const entries = Object.entries(updateMusicDataDto);
-    entries.forEach((entrie) => {
-      const [key, value] = entrie;
-      music[key] = value;
-      if (key === 'genre' || key === 'tags') {
-        music[`${key}Lower`] = value
-          ? value.map((v) => v.toLowerCase())
-          : value;
-      }
-    });
-
-    return this.updateMusic(music);
   }
 
   // Delete

@@ -1,3 +1,4 @@
+import { UpdateCoverDto } from './dto/update-cover.dto';
 import { UploadMusicDto } from './dto/upload-music.dto';
 import {
   deleteFileFirebase,
@@ -127,7 +128,7 @@ export class MusicService {
     const ids: number[] = [];
     historys.slice(0, 3).forEach((history) => ids.push(history.musicId));
     likeMusics.slice(0, 3).forEach((music) => ids.push(music.id));
-    return this.musicRepository.findRelatedMusicsByIds(ids);
+    return ids.length ? this.musicRepository.findRelatedMusicsByIds(ids) : [];
   }
 
   async searchMusic(keyward: string, pagingDto: PagingDto, uid?: string) {
@@ -138,12 +139,26 @@ export class MusicService {
     return this.musicRepository.findMusicsByTag(tag, pagingDto, uid);
   }
 
-  async findTrendingMusics(genre?: string, date?: number | 'week' | 'month') {
-    return this.musicRepository.findTrendingMusics(genre, date);
-  }
-
-  async findNewReleaseMusics(genre?: string, date?: number | 'week' | 'month') {
-    return this.musicRepository.findNewReleaseMusics(genre, date);
+  async findChartedMusics(
+    chart: 'trend' | 'newrelease',
+    genre?: string | string[],
+    date?: number | 'week' | 'month',
+  ) {
+    if (Array.isArray(genre)) {
+      return Promise.all(
+        genre.map(async (genre) => {
+          const musics =
+            chart === 'trend'
+              ? await this.musicRepository.findTrendingMusics(genre, date)
+              : await this.musicRepository.findNewReleaseMusics(genre, date);
+          return { genre, musics };
+        }),
+      );
+    } else {
+      return chart === 'trend'
+        ? await this.musicRepository.findTrendingMusics(genre, date)
+        : await this.musicRepository.findNewReleaseMusics(genre, date);
+    }
   }
 
   changeMusicFileData(
@@ -200,11 +215,32 @@ export class MusicService {
     return !newBuffer ? file : { ...file, buffer: newBuffer };
   }
 
-  async updateMusicData(id: number, updateMusicDataDto: UpdateMusicDataDto) {
-    return this.musicRepository.updateMusicData(id, updateMusicDataDto);
+  changeMusicData(music: Music, updateMusicDataDto: UpdateMusicDataDto) {
+    const chagedMusic = music;
+    const entries = Object.entries(updateMusicDataDto);
+    entries.forEach((entrie) => {
+      const [key, value] = entrie;
+      chagedMusic[key] = value;
+      if (key === 'genre' || key === 'tags') {
+        chagedMusic[`${key}Lower`] = value
+          ? value.map((v) => v.toLowerCase())
+          : value;
+      }
+    });
+    return chagedMusic;
   }
 
-  async changeMusicCover(id: number, file: MulterFile) {
+  async updateMusicData(id: number, updateMusicDataDto: UpdateMusicDataDto) {
+    // 음악정보를 가져온다.
+    const music = await this.musicRepository.findMusicById(id);
+    const changedMusic = this.changeMusicData(music, updateMusicDataDto);
+
+    return this.musicRepository.updateMusic(changedMusic);
+  }
+
+  async changeMusicCover(id: number, updateCoverDto: UpdateCoverDto) {
+    const { cover: file, data } = updateCoverDto;
+
     const music = await this.musicRepository.findMusicById(id);
     const { cover, link, filename, coverFilename } = music;
     const fileBase = `${Date.now()}_${music.userId}_`;
@@ -259,8 +295,9 @@ export class MusicService {
     music.coverFilename = cFilename;
     music.filename = newFilename;
     music.link = newLink;
+    const changedMusic = !data ? music : this.changeMusicData(music, data);
 
-    return this.musicRepository.updateMusic(music);
+    return this.musicRepository.updateMusic(changedMusic);
   }
 
   async deleteMusic(id: number, user: User): Promise<void> {

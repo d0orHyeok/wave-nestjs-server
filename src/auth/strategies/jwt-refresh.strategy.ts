@@ -38,7 +38,12 @@ export class JwtRefreshStrategy extends PassportStrategy(
     }
 
     const { username } = payload;
-    const user: User = await this.userRepository.findUserByUsername(username);
+    const user: User = await this.userRepository
+      .createQueryBuilder('user')
+      .addSelect('user.hashedRefreshToken')
+      .addSelect('user.password')
+      .where('user.username = :username', { username })
+      .getOne();
     if (!user) {
       throw new UnauthorizedException("Can't find user");
     }

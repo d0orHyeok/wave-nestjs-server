@@ -47,9 +47,11 @@ export class Playlist {
   @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: User;
 
-  @ManyToMany(() => User, (user) => user.repostPlaylists)
+  @ManyToMany(() => User, (user) => user.repostPlaylists, {
+    onDelete: 'CASCADE',
+  })
   reposts: User[];
-  @ManyToMany(() => User, (user) => user.likePlaylists)
+  @ManyToMany(() => User, (user) => user.likePlaylists, { onDelete: 'CASCADE' })
   likes: User[];
 
   // Music in Playlist

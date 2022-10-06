@@ -1,3 +1,5 @@
+import { UpdateCoverPipe } from './pipes/update-cover.pipe';
+import { UpdateCoverDto } from './dto/update-cover.dto';
 import { UpdateMusicDataDto } from './dto/update-music-data.dto';
 import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
 import { User } from 'src/entities/user.entity';
@@ -13,23 +15,20 @@ import {
   Patch,
   Post,
   Query,
-  UploadedFile,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
   ValidationPipe,
 } from '@nestjs/common';
 import { GetUser } from 'src/decorators/get-user.decorator';
-import {
-  FileFieldsInterceptor,
-  FileInterceptor,
-} from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { UploadedFilesPipe } from './pipes/uploaded-files.pipe';
 import { UploadMusicDto } from './dto/upload-music.dto';
 import { ConfigService } from '@nestjs/config';
 import { CheckDatePipe } from './pipes/check-date.pipe';
 import { musicGenres } from 'src/entities/music.entity';
-import { MulterFile } from 'src/entities/common.types';
+import { JwtAuthUserGuard } from 'src/auth/guards/jwt-auth-user.guard';
+import { CheckChartPipe } from './pipes/check-chart.pipe.ts';
 
 @Controller('music')
 export class MusicController {
@@ -40,15 +39,13 @@ export class MusicController {
   private logger = new Logger('MusicController');
 
   @Get('/')
-  async getAllMusic(@Query('option') option?: string) {
+  async getAllMusic(@Query('option') option?: 'trend' | 'newrelease') {
     if (option) {
       const genres = [undefined, ...musicGenres];
       const musicsList = await Promise.all(
-        genres.map((genre) => {
-          return option === 'newrelease'
-            ? this.musicService.findNewReleaseMusics(genre)
-            : this.musicService.findTrendingMusics(genre);
-        }),
+        genres.map((genre) =>
+          this.musicService.findChartedMusics(option, genre),
+        ),
       );
 
       const items = genres
@@ -95,7 +92,7 @@ export class MusicController {
   }
 
   @Get('/related')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthUserGuard)
   findUsersRelatedMusics(@GetUser() user: User) {
     return this.musicService.findUsersRelated(user);
   }
@@ -141,20 +138,13 @@ export class MusicController {
     return this.musicService.findMusicsByTag(tag, pagingDto, uid);
   }
 
-  @Get('/trend')
-  getTrendingMusics(
-    @Query('genre') genre?: string,
+  @Get('/chart')
+  async getChartedMusics(
+    @Query('chart', CheckChartPipe) chart?: 'trend' | 'newrelease',
+    @Query('genre') genre?: string | string[],
     @Query('date', CheckDatePipe) date?: number | 'week' | 'month',
   ) {
-    return this.musicService.findTrendingMusics(genre, date);
-  }
-
-  @Get('/newrelease')
-  getNewReleaseMusics(
-    @Query('genre') genre?: string,
-    @Query('date', CheckDatePipe) date?: number | 'week' | 'month',
-  ) {
-    return this.musicService.findNewReleaseMusics(genre, date);
+    return this.musicService.findChartedMusics(chart, genre, date);
   }
 
   @Post('/upload')
@@ -193,11 +183,16 @@ export class MusicController {
 
   @Patch('/:id/cover')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'cover', maxCount: 1 },
+      { name: 'data', maxCount: 1 },
+    ]),
+  )
   changeCover(
     @Param('id', ParseIntPipe) id: number,
-    @UploadedFile() file: MulterFile,
+    @UploadedFiles(UpdateCoverPipe) updateCoverDto: UpdateCoverDto,
   ) {
-    return this.musicService.changeMusicCover(id, file);
+    return this.musicService.changeMusicCover(id, updateCoverDto);
   }
 }

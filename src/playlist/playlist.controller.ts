@@ -1,3 +1,4 @@
+import { UpdateImageDto } from './dto/update-image.dto';
 import { UpdatePlaylistDto } from './dto/updatePlaylistDto';
 import {
   Body,
@@ -9,7 +10,7 @@ import {
   Patch,
   Post,
   Query,
-  UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
   ValidationPipe,
@@ -19,8 +20,8 @@ import { GetUser } from 'src/decorators/get-user.decorator';
 import { User } from 'src/entities/user.entity';
 import { CreatePlaylistDto } from './dto/createPlaylistDto';
 import { PlaylistService } from './playlist.service';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { MulterFile } from 'src/entities/common.types';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { UpdateImagePipe } from './pipes/update-image.pipe';
 
 @Controller('playlist')
 export class PlaylistController {
@@ -102,32 +103,41 @@ export class PlaylistController {
     return this.playlistService.updatePlaylistInfo(id, updatePlaylistDto);
   }
 
+  @Patch('/image/:id')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'image', maxCount: 1 },
+      { name: 'data', maxCount: 1 },
+    ]),
+  )
+  changeCover(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFiles(UpdateImagePipe) updateImageDto: UpdateImageDto,
+  ) {
+    return this.playlistService.changePlaylistImage(id, updateImageDto);
+  }
+
   @Patch('/musics/add/:id')
   @UseGuards(JwtAuthGuard)
   async addMusicToPlaylist(
     @Param('id', ParseIntPipe) id: number,
     @Body('musicIds') musicIds: number[],
   ) {
-    return this.playlistService.addMusicToPlaylist(id, musicIds || []);
+    return this.playlistService.editPlaylistMusics(id, musicIds || [], 'add');
   }
 
-  @Patch('/musics/change/:id')
+  @Patch('/musics/delete/:id')
   @UseGuards(JwtAuthGuard)
-  async changePlaylistMusics(
+  async deleteMusicToPlaylist(
     @Param('id', ParseIntPipe) id: number,
     @Body('musicIds') musicIds: number[],
   ) {
-    return this.playlistService.changePlaylistMusics(id, musicIds);
-  }
-
-  @Patch('/image/:id')
-  @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('file'))
-  changeCover(
-    @Param('id', ParseIntPipe) id: number,
-    @UploadedFile() file: MulterFile,
-  ) {
-    return this.playlistService.changePlaylistImage(id, file);
+    return this.playlistService.editPlaylistMusics(
+      id,
+      musicIds || [],
+      'delete',
+    );
   }
 
   @Delete('/:id')

@@ -44,32 +44,50 @@ export class User extends BaseEntity {
   description: string;
 
   // User Likes & Reposts
-  @ManyToMany(() => Music, (music) => music.likes, { cascade: true })
+  @ManyToMany(() => Music, (music) => music.likes, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @JoinTable()
   likeMusics: Music[];
-  @ManyToMany(() => Music, (music) => music.reposts, { cascade: true })
+  @ManyToMany(() => Music, (music) => music.reposts, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @JoinTable()
   repostMusics: Music[];
-  @ManyToMany(() => Playlist, (playlist) => playlist.likes, { cascade: true })
+  @ManyToMany(() => Playlist, (playlist) => playlist.likes, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @JoinTable()
   likePlaylists: Playlist[];
-  @ManyToMany(() => Playlist, (playlist) => playlist.reposts, { cascade: true })
+  @ManyToMany(() => Playlist, (playlist) => playlist.reposts, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @JoinTable()
   repostPlaylists: Playlist[];
 
   // Follow
-  @ManyToMany(() => User, (user) => user.following)
+  @ManyToMany(() => User, (user) => user.following, { onDelete: 'CASCADE' })
   followers: User[];
-  @ManyToMany(() => User, (user) => user.followers)
+  @ManyToMany(() => User, (user) => user.followers, { onDelete: 'CASCADE' })
   @JoinTable()
   following: User[];
 
   // User Relation column
-  @OneToMany(() => Music, (music) => music.user, { eager: true })
+  @OneToMany(() => Music, (music) => music.user, {
+    eager: true,
+    onDelete: 'CASCADE',
+  })
   musics: Music[];
-  @OneToMany(() => Playlist, (playlist) => playlist.user, { eager: true })
+  @OneToMany(() => Playlist, (playlist) => playlist.user, {
+    eager: true,
+    onDelete: 'CASCADE',
+  })
   playlists: Playlist[];
-  @OneToMany(() => Comment, (comment) => comment.user)
+  @OneToMany(() => Comment, (comment) => comment.user, { onDelete: 'CASCADE' })
   comments: Comment[];
 
   // History

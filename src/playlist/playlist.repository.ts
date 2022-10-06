@@ -1,4 +1,3 @@
-import { UpdatePlaylistDto } from './dto/updatePlaylistDto';
 import { CreatePlaylistDto } from './dto/createPlaylistDto';
 import {
   ConflictException,
@@ -216,39 +215,6 @@ export class PlaylistRepository extends Repository<Playlist> {
         'Error to update playlist info',
       );
     }
-  }
-
-  async updatePlaylistInfo(
-    playlistId: number,
-    updatePlaylistDto: UpdatePlaylistDto,
-  ) {
-    const playlist = await this.findPlaylistById(playlistId);
-    Object.entries(updatePlaylistDto).forEach((entrie) => {
-      const [key, value] = entrie;
-      if (value) {
-        playlist[key] = value;
-        if (key === 'tags') {
-          playlist['tagsLower'] = value.map((t) => t.toLowerCase());
-        }
-      }
-    });
-
-    return this.updatePlaylist(playlist);
-  }
-
-  async addMusicToPlaylist(playlistId: number, musics: Music[]) {
-    const playlist = await this.findPlaylistById(playlistId);
-    const existMusics = playlist.musics;
-    playlist.musics = [...existMusics, ...musics];
-
-    return this.updatePlaylist(playlist);
-  }
-
-  async changePlaylistMusics(id: number, musics: Music[]) {
-    const playlist = await this.findPlaylistById(id);
-    playlist.musics = musics;
-
-    return this.updatePlaylist(playlist);
   }
 
   async deletePlaylist(id: number, user: User): Promise<void> {

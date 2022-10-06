@@ -13,6 +13,7 @@ import { HistoryModule } from './history/history.module';
 import { MusicRepository } from './music/music.repository';
 import { UserRepository } from './auth/user.repository';
 import { PlaylistRepository } from './playlist/playlist.repository';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { PlaylistRepository } from './playlist/playlist.repository';
     PlaylistModule,
     CommentModule,
     HistoryModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

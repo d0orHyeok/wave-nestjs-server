@@ -1,3 +1,4 @@
+import { EmailModule } from './../email/email.module';
 import { HistoryRepository } from './../history/history.repository';
 import { PlaylistRepository } from './../playlist/playlist.repository';
 import { MusicRepository } from 'src/music/music.repository';
@@ -11,6 +12,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UserRepository } from './user.repository';
+import { JwtUserStrategy } from './strategies/jwt-user.strategy';
 
 @Module({
   imports: [
@@ -29,9 +31,10 @@ import { UserRepository } from './user.repository';
         signOptions: { expiresIn: 60 * 60 },
       }),
     }),
+    EmailModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, JwtRefreshStrategy],
+  providers: [AuthService, JwtStrategy, JwtRefreshStrategy, JwtUserStrategy],
   exports: [JwtStrategy, PassportModule, JwtModule, AuthService],
 })
 export class AuthModule {}

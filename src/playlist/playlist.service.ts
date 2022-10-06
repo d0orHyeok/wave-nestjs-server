@@ -1,3 +1,4 @@
+import { UpdateImageDto } from './dto/update-image.dto';
 import { UserRepository } from 'src/auth/user.repository';
 import { UpdatePlaylistDto } from './dto/updatePlaylistDto';
 import { CreatePlaylistDto } from './dto/createPlaylistDto';
@@ -9,7 +10,7 @@ import { PlaylistRepository } from './playlist.repository';
 import { PagingDto } from 'src/common/dto/paging.dto';
 import { deleteFileFirebase, uploadFileFirebase } from 'src/fileFunction';
 import { ConfigService } from '@nestjs/config';
-import { MulterFile } from 'src/entities/common.types';
+import { Playlist } from 'src/entities/playlist.entity';
 
 @Injectable()
 export class PlaylistService {
@@ -85,36 +86,57 @@ export class PlaylistService {
     return this.playlistRepository.findPlaylistsByTag(tag, pagingDto, uid);
   }
 
+  async changePlaylistData(
+    playlist: Playlist,
+    updatePlaylistDto: UpdatePlaylistDto,
+  ) {
+    const { musicIds, ...body } = updatePlaylistDto;
+
+    const changedPlaylist = playlist;
+    Object.entries(body).forEach((entrie) => {
+      const [key, value] = entrie;
+      if (value) {
+        changedPlaylist[key] = value;
+        if (key === 'tags') {
+          changedPlaylist['tagsLower'] = [...value].map((t) => t.toLowerCase());
+        }
+      }
+    });
+
+    if (musicIds) {
+      // 변경할 음악들을 가져온다.
+      const musics = await this.musicRepository.findMusicByIds(musicIds);
+      const orderedMusics = musicIds
+        .map((id) => musics.find((music) => music.id === id))
+        .filter((m) => Boolean(m));
+      playlist.musics = orderedMusics;
+    }
+
+    return changedPlaylist;
+  }
+
   async updatePlaylistInfo(
     playlistId: number,
     updatePlaylistDto: UpdatePlaylistDto,
   ) {
-    const updatedPlaylist = await this.playlistRepository.updatePlaylistInfo(
-      playlistId,
+    const playlist = await this.findPlaylistById(playlistId);
+    const changedPlaylist = await this.changePlaylistData(
+      playlist,
       updatePlaylistDto,
+    );
+
+    const updatedPlaylist = await this.playlistRepository.updatePlaylist(
+      changedPlaylist,
     );
     const user = await this.userRepository.findUserById(updatedPlaylist.userId);
     return { ...updatedPlaylist, user };
   }
 
-  async changePlaylistMusics(id: number, musicIds: number[]) {
-    const musics = await this.musicRepository.findMusicByIds(musicIds);
-    const orderedMusics = musicIds.map((id) =>
-      musics.find((music) => music.id === id),
-    );
-    const playlist = await this.playlistRepository.changePlaylistMusics(
-      id,
-      orderedMusics,
-    );
-    return playlist.musics;
-  }
-
-  async addMusicToPlaylist(playlistId: number, musicIds: number[]) {
-    const musics = await this.musicRepository.findMusicByIds(musicIds);
-    return this.playlistRepository.addMusicToPlaylist(playlistId, musics);
-  }
-
-  async changePlaylistImage(playlistId: number, file: MulterFile) {
+  async changePlaylistImage(
+    playlistId: number,
+    updateImageDto: UpdateImageDto,
+  ) {
+    const { image: file, data } = updateImageDto;
     const playlist = await this.playlistRepository.findPlaylistById(playlistId);
     const { imageFilename } = playlist;
 
@@ -136,9 +158,40 @@ export class PlaylistService {
     playlist.image = link;
     playlist.imageFilename = filename;
 
-    const result = await this.playlistRepository.updatePlaylist(playlist);
+    const changedPlaylist = !data
+      ? playlist
+      : await this.changePlaylistData(playlist, data);
+
+    const updatedPlaylist = await this.playlistRepository.updatePlaylist(
+      changedPlaylist,
+    );
     const user = await this.userRepository.findUserById(playlist.userId);
-    return { ...result, user };
+    return { ...updatedPlaylist, user };
+  }
+
+  async editPlaylistMusics(
+    playlistId: number,
+    musicIds: number[],
+    action: 'add' | 'delete',
+  ) {
+    const playlist = await this.playlistRepository
+      .createQueryBuilder('playlist')
+      .leftJoinAndSelect('playlist.musics', 'musics')
+      .leftJoinAndSelect('playlist.user', 'uesr')
+      .loadRelationCountAndMap('musics.count', 'musics.history')
+      .where('playlist.id = :playlistId', { playlistId })
+      .getOne();
+
+    let newMusicList = [];
+    if (action === 'add') {
+      const musics = await this.musicRepository.findMusicByIds(musicIds);
+      newMusicList = [...playlist.musics, ...musics];
+    } else {
+      newMusicList = playlist.musics.filter((m) => !musicIds.includes(m.id));
+    }
+    playlist.musics = newMusicList;
+
+    return this.playlistRepository.updatePlaylist(playlist);
   }
 
   async deletePlaylist(playlistId: number, user: User) {

@@ -21,4 +21,7 @@ export class UpdatePlaylistDto {
   @IsOptional()
   @IsString()
   status: EntityStatus;
+
+  @IsOptional()
+  musicIds: number[];
 }

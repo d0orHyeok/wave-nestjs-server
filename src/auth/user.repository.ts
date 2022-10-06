@@ -6,11 +6,7 @@ import {
   ConflictException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { Music } from 'src/entities/music.entity';
-import { Playlist } from 'src/entities/playlist.entity';
 import { PagingDto } from 'src/common/dto/paging.dto';
-
-type TargetType = Music | Playlist;
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
@@ -151,6 +147,18 @@ export class UserRepository extends Repository<User> {
     }
   }
 
+  async updateUser(user: User) {
+    try {
+      const updatedUser = await this.save(user);
+      return updatedUser;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error,
+        `Error to update user, user ID: ${user.id}`,
+      );
+    }
+  }
+
   async updateRefreshToken(user: User, hashedRefreshToken?: string) {
     try {
       await this.createQueryBuilder()
@@ -166,67 +174,16 @@ export class UserRepository extends Repository<User> {
     }
   }
 
-  async toggleFollow(user: User, target: User) {
-    const following = user.following || [];
-    let findIndex = -1;
-    const newFollowing = following.filter((f, index) => {
-      if (f.id !== target.id) {
-        return true;
-      } else {
-        findIndex = index;
-        return false;
-      }
-    });
-
-    if (findIndex === -1) {
-      newFollowing.push(target);
-    }
-    user.following = newFollowing;
-
+  async deleteUser(user: User): Promise<void> {
     try {
-      await this.save(user);
-      return {
-        type: findIndex === -1 ? 'follow' : 'unfollow',
-        following: newFollowing,
-      };
-    } catch (error) {
-      throw new InternalServerErrorException(error, `Error to update follow`);
-    }
-  }
-
-  async toggleColumnTarget(
-    user: User,
-    target: TargetType,
-    column: 'like' | 'repost',
-  ) {
-    const columnName = column + ('title' in target ? 'Musics' : 'Playlists');
-    const targetItems: TargetType[] = user[columnName] || [];
-    let findIndex = -1;
-    const newTargetItems = targetItems.filter((item, index) => {
-      if (item.id !== target.id) {
-        return true;
-      } else {
-        findIndex = index;
-        return false;
+      const result = await this.delete({ id: user.id });
+      if (result.affected === 0) {
+        throw new InternalServerErrorException(
+          `Can't find user with id ${user.id}`,
+        );
       }
-    });
-
-    if (findIndex === -1) {
-      newTargetItems.push(target);
-    }
-    user[columnName] = newTargetItems;
-
-    try {
-      await this.save(user);
-      return {
-        toggleType: findIndex === -1 ? column : `un${column}`,
-        [columnName]: newTargetItems,
-      };
     } catch (error) {
-      throw new InternalServerErrorException(
-        error,
-        `Error to update ${columnName}`,
-      );
+      throw new InternalServerErrorException(error, 'Error to delete user');
     }
   }
 }
