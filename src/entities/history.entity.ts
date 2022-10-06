@@ -24,7 +24,6 @@ export class History extends BaseEntity {
   userId: string;
   @ManyToOne(() => User, (user) => user.historys, {
     cascade: true,
-    onDelete: 'CASCADE',
     nullable: true,
   })
   @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
@@ -35,7 +34,6 @@ export class History extends BaseEntity {
   musicId: number;
   @ManyToOne(() => Music, (music) => music.history, {
     cascade: true,
-    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'musicId', referencedColumnName: 'id' })
   music: Music;
