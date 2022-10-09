@@ -4,8 +4,9 @@
 
 - NestJS, TypeScript사용한 프로젝트입니다.
 - **Server status**
-
-  ![Heroku](https://heroku-badge.herokuapp.com/?app=wave-nestjs)
+  | Client | Server |
+  | --- | --- |
+  | ![Netlify Status](https://api.netlify.com/api/v1/badges/92c9ca1c-7424-450e-999b-9707876a5883/deploy-status) | ![Heroku](https://heroku-badge.herokuapp.com/?app=wave-nestjs) |
 
 ## **Installation**
 
@@ -57,7 +58,9 @@ FIREBASE_STORAGE_BASE_URL=[YOUR_FIREBASE_STORAGE_BASE_URL]
 
 ## **Documentation**
 
-[API 사용문서](https://wave-nestjs.herokuapp.com/api)
+[**Client**](https://github.com/d0orHyeok/wave-client-production)
+
+[**API 사용문서**](https://wave-nestjs.herokuapp.com/api)
 
 ## **Author**
 

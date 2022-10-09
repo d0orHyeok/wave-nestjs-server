@@ -1,8 +1,8 @@
 {
   "name": "server",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "Wave API Server",
+  "author": "JangHyeok Kim",
   "private": true,
   "license": "MIT",
   "engines": {
