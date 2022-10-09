@@ -1,73 +1,71 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
-</p>
+# **Wave NestJS Server** · [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/d0orHyeok/wave-client-production/blob/master/LICENSE) <img src="https://img.shields.io/badge/TypeScript-3178C6?flat&logo=TypeScript&logoColor=white"> <img src="https://img.shields.io/badge/NestJS-E0234E?flat&logo=NestJS&logoColor=white"> <img src="https://img.shields.io/badge/Firebase-FFCA28?flat&logo=Firebase&logoColor=white">
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+[Wave](https://wave-d0orhyeok.netlify.app/) 음악공유 스트리밍 사이트의 백엔드서버입니다.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+- NestJS, TypeScript사용한 프로젝트입니다.
+- **Server status**
 
-## Description
+  ![Heroku](https://heroku-badge.herokuapp.com/?app=wave-nestjs)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## **Installation**
 
-## Installation
+프로젝트 클론 후 패키지 설치를 진행하고 환경변수를 등록하고 실행하세요.
 
-```bash
-$ npm install
+### Clone Project
+
+```sh
+git clone [REPO_URL] [DIR]
 ```
 
-## Running the app
+### Install development dependencies:
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```sh
+npm install
+# or
+yarn add
 ```
 
-## Test
+### Environment Variables
 
-```bash
-# unit tests
-$ npm run test
+```sh
+# .env.production
+# .env.development
+CLIENT_URL=[YOUR_CLIENT_URL]
+SERVER_URL=[YOUR_SERVER_URL]
+SERVER_PORT=[PORT]
 
-# e2e tests
-$ npm run test:e2e
+JWT_SECRET=[SECRET]
+JWT_ACCESS_TOKEN_SECRET=[SECRET]
+JWT_REFRESH_TOKEN_SECRET=[SECRET]
+JWT_ACCESS_TOKEN_EXPIRATION_TIME=[SECOND]
+JWT_REFRESH_TOKEN_EXPIRATION_TIME=[SECOND]
 
-# test coverage
-$ npm run test:cov
+DB_HOST=[POSTGRESQL_HOST]
+DB_PORT=[POSTGRESQL_PORT]
+DB_PASSWORD=[POSTGRESQL_PASSWORD]
+DB_USERNAME=[POSTGRESQL_USER]
+DB_NAME=[POSTGRESQL_DATABASE_NAME]
+DB_SYNC=true
+
+FIREBASE_PROJECT_ID=[YOUR_FIREBASE_PROJECT_ID]
+FIREBASE_PRIVATE_KEY=[YOUR_FIREBASE_PRIVATE_KEY]
+FIREBASE_CLIENT_EMAIL=[YOUR_FIREBASE_CLIENT_EMAIL]
+FIREBASE_STORAGE_BASE_URL=[YOUR_FIREBASE_STORAGE_BASE_URL]
+# Exampe FIREBASE_STORAGE_BASE_URL
+# https://firebasestorage.googleapis.com/v0/b/[your_storage_url]/o/
 ```
 
-## Support
+## **Documentation**
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+[API 사용문서](https://wave-nestjs.herokuapp.com/api)
 
-## Stay in touch
+## **Author**
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- [d0orHyeok](https://github.com/d0orHyeok) - JangHyeok Kim
+- Email
+  - d0oR.hyeok@gmail.com
+  - d0or_hyeok@naver.com
 
-## License
+## **License**
 
-Nest is [MIT licensed](LICENSE).
+[MIT licensed](LICENSE).

@@ -1,11 +1,19 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
 export class AuthCredentailDto {
+  @ApiProperty({
+    required: true,
+    description: '아이디',
+    minLength: 6,
+    maxLength: 20,
+  })
   @IsString()
   @MinLength(6)
   @MaxLength(20)
   username: string;
 
+  @ApiProperty({ required: true, minLength: 6, maxLength: 20 })
   @IsString()
   @MinLength(6)
   @MaxLength(20)
